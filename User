@@ -1,0 +1,127 @@
+package BankManagementSystem;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+public class User {
+
+	private Connection connection;
+	private Scanner scanner;
+	
+	public User(Connection connection, Scanner scanner) 
+	{
+		super();
+		this.connection = connection;
+		this.scanner = scanner;
+	}
+	
+	public void register() {
+		
+		scanner.nextLine();
+		System.out.println("Enter Your Full name.....");
+		String fullName = scanner.nextLine();
+		System.out.println("Enter Your Email.....");
+		String email = scanner.nextLine();
+		System.out.println("Enter Your Phone No.......");
+		String phoneNo = scanner.nextLine();
+		System.out.println("Enter Your password...");
+		String password = scanner.nextLine();
+		
+		if(user_exist(phoneNo)) {
+			System.out.println("User Already Exists for this Phone Number ....");
+			return; 
+		}
+		
+		String register_query = "INSERT INTO users(full_name, email, phone_number, password) VALUES(?, ?, ?, ?)";
+		
+		try {
+			
+			PreparedStatement ps = connection.prepareStatement(register_query);
+			ps.setString(1, fullName);
+			ps.setString(2, email); 
+			ps.setString(3, phoneNo);
+			ps.setString(4, password);
+			
+			int affectedRows =ps.executeUpdate();
+			
+			if(affectedRows > 0 ) {
+				System.out.println("Registration Successfull........");
+			}
+			else {
+				System.out.println("Registration Failed......");
+			}
+		}
+			catch (SQLException e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
+	}
+	
+	public String login()
+	{
+	    scanner.nextLine();   // nextInt() ke baad buffer clear
+
+	    System.out.println("Enter Your PhoneNO:");
+	    String phoneNo = scanner.nextLine();
+
+	    System.out.print("Enter Your Password: ");
+	    String password = scanner.nextLine();
+
+	    String login_query =
+	            "SELECT * FROM users WHERE phone_number = ? AND password = ?";
+
+	    try {
+	        PreparedStatement ps =
+	                connection.prepareStatement(login_query);
+
+	        ps.setString(1, phoneNo);
+	        ps.setString(2, password);
+
+	        ResultSet rs = ps.executeQuery();
+
+	        if(rs.next()) {
+	            return phoneNo;
+	        } else {
+	            return null;
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return null;
+	}
+	
+	public boolean user_exist(String phoneNO)
+	{
+		String query= "SELECT * FROM users WHERE phone_number = ?";
+		
+		try {
+			PreparedStatement ps=connection.prepareStatement(query);
+			ps.setString(1, phoneNO);
+			
+			ResultSet rs=ps.executeQuery();
+			
+			if(rs.next()) {
+				return true;
+			}
+			else { 
+				return false;
+			}
+		}
+		catch (SQLException e) {
+			// TODO: handle exception
+			
+			e.printStackTrace();
+		}
+	
+		return false; 
+	}
+	
+	
+}
+
+

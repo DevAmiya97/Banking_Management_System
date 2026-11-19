@@ -1,0 +1,68 @@
+package BankManagementSystem;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class TransactionHistory {
+
+    private Connection connection;
+
+    public TransactionHistory(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void addTransaction( long accountNumber, String transactionType, double amount)
+    {
+            String query =  "INSERT INTO transactions(account_number, transaction_type, amount) VALUES (?, ?, ?)";
+
+        try {
+
+            PreparedStatement ps = connection.prepareStatement(query);
+
+            ps.setLong(1, accountNumber); 
+            ps.setString(2, transactionType);
+            ps.setDouble(3, amount);
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void showTransactionHistory(long accountNumber)
+    {
+        String query = "SELECT * FROM transactions WHERE account_number = ? ORDER BY transaction_date DESC";
+
+        try {
+
+            PreparedStatement ps = connection.prepareStatement(query);
+
+            ps.setLong(1, accountNumber);
+
+            ResultSet rs = ps.executeQuery();
+
+            System.out.println("\n **** WELCOME TO TRANSACTION HISTORY *** ");
+
+            while(rs.next()) {
+
+            	System.out.println("Account No :" +rs.getLong("account_number"));
+            	
+                System.out.println("Transaction ID : " + rs.getLong("transaction_id"));
+
+                System.out.println("Type : "+ rs.getString("transaction_type"));
+
+                System.out.println("Amount : ₹" + rs.getDouble("amount"));
+
+                System.out.println( "Date : "+ rs.getTimestamp("transaction_date"));
+
+                System.out.println("--------------------------------");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
